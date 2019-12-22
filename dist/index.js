@@ -1230,10 +1230,10 @@ function suppressOutput(os_version) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (os_version) {
             case 'win32':
-                return ' >$null 2>&1';
+                return ' ';
             case 'linux':
             case 'darwin':
-                return ' >/dev/null 2>&1';
+                return ' ';
             default:
                 return yield log('Platform ' + os_version + ' is not supported', os_version, 'error');
         }
@@ -2196,13 +2196,13 @@ function addExtensionDarwin(extension_csv, version) {
                 let install_command = '';
                 switch (version + extension) {
                     case '5.6xdebug':
-                        install_command = 'sudo pecl install xdebug-2.5.5 >/dev/null 2>&1';
+                        install_command = 'sudo pecl install xdebug-2.5.5 ';
                         break;
                     case '5.6redis':
-                        install_command = 'sudo pecl install redis-2.2.8 >/dev/null 2>&1';
+                        install_command = 'sudo pecl install redis-2.2.8 ';
                         break;
                     default:
-                        install_command = 'sudo pecl install ' + extension + ' >/dev/null 2>&1';
+                        install_command = 'sudo pecl install ' + extension + ' ';
                         break;
                 }
                 script +=
@@ -2263,7 +2263,7 @@ function addExtensionLinux(extension_csv, version) {
                 switch (version + extension) {
                     case '7.4redis':
                         install_command =
-                            'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y php7.4-igbinary php7.4-redis >/dev/null 2>&1';
+                            'sudo DEBIAN_FRONTEND=noninteractive apt-get install -y php7.4-igbinary php7.4-redis ';
                         break;
                     case '7.2phalcon3':
                     case '7.3phalcon3':
@@ -2272,7 +2272,7 @@ function addExtensionLinux(extension_csv, version) {
                                 path.join(__dirname, '../src/scripts/phalcon.sh') +
                                 ' 3.4.x ' +
                                 version +
-                                ' >/dev/null 2>&1';
+                                ' ';
                         break;
                     case '7.2phalcon4':
                     case '7.3phalcon4':
@@ -2282,7 +2282,7 @@ function addExtensionLinux(extension_csv, version) {
                                 path.join(__dirname, '../src/scripts/phalcon.sh') +
                                 ' master ' +
                                 version +
-                                ' >/dev/null 2>&1';
+                                ' ';
                         break;
                     case '7.0gearman':
                     case '7.1gearman':
@@ -2294,7 +2294,7 @@ function addExtensionLinux(extension_csv, version) {
                                 path.join(__dirname, '../src/scripts/gearman.sh') +
                                 ' ' +
                                 version +
-                                ' >/dev/null 2>&1';
+                                ' ';
                         break;
                     default:
                         install_command =
@@ -2302,9 +2302,9 @@ function addExtensionLinux(extension_csv, version) {
                                 version +
                                 '-' +
                                 extension.replace('pdo_', '').replace('pdo-', '') +
-                                ' >/dev/null 2>&1 || sudo pecl install ' +
+                                '  || sudo pecl install ' +
                                 extension +
-                                ' >/dev/null 2>&1';
+                                ' ';
                         break;
                 }
                 script +=

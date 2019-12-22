@@ -42,7 +42,7 @@ if ($null -eq $installed -or -not("$($installed.Version).".StartsWith(($version 
     $version = 'master'
   }
 
-  Install-Php -Version $version -Architecture $arch -ThreadSafe $true -InstallVC -Path $php_dir -TimeZone UTC -InitialPhpIni Production -Force >$null 2>&1
+  Install-Php -Version $version -Architecture $arch -ThreadSafe $true -InstallVC -Path $php_dir -TimeZone UTC -InitialPhpIni Production -Force 
   $installed = Get-Php -Path $php_dir
   $status = "Installed PHP $($installed.FullVersion)"
 }
