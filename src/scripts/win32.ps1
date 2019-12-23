@@ -9,6 +9,7 @@ $php_dir = 'C:\tools\php'
 $ext_dir = $php_dir + '\ext'
 $ProgressPreference = 'SilentlyContinue'
 $master_version = '8.0'
+$arch='x64'
 
 Function Step-Log($message) {
   printf "\n\033[90;1m==> \033[0m\033[37;1m%s \033[0m\n" $message
@@ -33,7 +34,6 @@ if (Test-Path -LiteralPath $php_dir -PathType Container) {
 }
 Step-Log "Setup PHP and Composer"
 if ($null -eq $installed -or -not("$($installed.Version).".StartsWith(($version -replace '^(\d+(\.\d+)*).*', '$1.')))) {
-  $arch='x64'
   if ($version -lt '7.0') {
     Install-Module -Name VcRedist -Force
     $arch='x86'
@@ -61,27 +61,6 @@ if ($version -eq 'master') {
   Copy-Item $dir"\..\src\ext\php_pcov.dll" -Destination $ext_dir"\php_pcov.dll"
   Set-PhpIniKey -Key 'opcache.jit_buffer_size' -Value '256M' -Path $php_dir
   Set-PhpIniKey -Key 'opcache.jit' -Value '1235' -Path $php_dir
-}
-
-Function Add-Phalcon {
-  Param (
-    [Parameter(Position = 0, Mandatory = $true)]
-    [ValidateNotNull()]
-    [ValidateSet('phalcon3', 'phalcon4')]
-    [string]
-    $extension
-  )
-  Install-Phpextension psr
-  $extension_version = $extension.substring($extension.Length - 1)
-  $domain_uri = "https://github.com"
-  $uri = Invoke-WebRequest -UseBasicParsing -Uri $domain_uri/phalcon/cphalcon/releases | `
-         Select-String -Pattern "href=`"(.*phalcon_${arch}_.*_php${version}_${extension_version}.*[0-9].zip)`"" | `
-         ForEach-Object { $_.matches.groups[1].value } | `
-         Select-Object -Index 0
-  Invoke-WebRequest -UseBasicParsing -Uri $domain_uri/$uri -OutFile $ENV:TEMP\phalcon.zip
-  Expand-Archive -Path $ENV:TEMP\phalcon.zip -DestinationPath $ENV:TEMP\phalcon -Force
-  Copy-Item -Path $ENV:TEMP\phalcon\php_phalcon.dll -Destination $ext_dir
-  Enable-Phpextension phalcon
 }
 
 Function Add-Extension {
@@ -119,6 +98,31 @@ Function Add-Extension {
     }
   }
   catch {
+    Add-Log $cross $extension "Could not install $extension on PHP $($installed.FullVersion)"
+  }
+}
+
+Function Add-Phalcon {
+  Param (
+    [Parameter(Position = 0, Mandatory = $true)]
+    [ValidateNotNull()]
+    [ValidateSet('phalcon3', 'phalcon4')]
+    [string]
+    $extension
+  )
+  $extension_version = $extension.substring($extension.Length - 1)
+  $nts = if(! $installed.ThreadSafe ) { "_nts" } else { "" }
+  $domain = "https://github.com"
+  Install-Phpextension psr
+  try
+  {
+    $match = Invoke-WebRequest -UseBasicParsing -Uri $domain/phalcon/cphalcon/releases | Select-String -Pattern "href=`"(.*phalcon_${arch}_.*_php${version}_${extension_version}.*[0-9]${nts}.zip)`""
+    $zip_file = $match.Matches[0].Groups[1].Value
+    Invoke-WebRequest -UseBasicParsing -Uri $domain/$zip_file -OutFile $PSScriptRoot\phalcon.zip
+    Expand-Archive -Path $PSScriptRoot\phalcon.zip -DestinationPath $PSScriptRoot\phalcon -Force > $null 2>&1
+    New-Item -ItemType SymbolicLink -Path $ext_dir\php_phalcon.dll -Target $PSScriptRoot\phalcon\php_phalcon.dll > $null 2>&1
+    Add-Extension $extension.substring(0, $extension.Length - 1)
+  } catch {
     Add-Log $cross $extension "Could not install $extension on PHP $($installed.FullVersion)"
   }
 }
