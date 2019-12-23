@@ -53,9 +53,12 @@ export async function addExtensionWindows(
   let script = '\n';
   await utils.asyncForEach(extensions, async function(extension: string) {
     // add script to enable extension is already installed along with php
-    switch (version + extension) {
-      case '7.4redis':
+    switch (true) {
+      case /^7\.4redis$/.test(version + extension):
         script += '\nAdd-Extension ' + extension + ' beta';
+        break;
+      case /^7\.[0-3]phalcon3$|^7\.[2-4]phalcon4$/.test(version + extension):
+        script += '\nAdd-Phalcon ' + extension;
         break;
       default:
         script += '\nAdd-Extension ' + extension;

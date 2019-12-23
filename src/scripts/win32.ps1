@@ -63,6 +63,27 @@ if ($version -eq 'master') {
   Set-PhpIniKey -Key 'opcache.jit' -Value '1235' -Path $php_dir
 }
 
+Function Add-Phalcon {
+  Param (
+    [Parameter(Position = 0, Mandatory = $true)]
+    [ValidateNotNull()]
+    [ValidateSet('phalcon3', 'phalcon4')]
+    [string]
+    $extension
+  )
+  Install-Phpextension psr
+  $extension_version = $extension.substring($extension.Length - 1)
+  $domain_uri = "https://github.com"
+  $uri = Invoke-WebRequest -UseBasicParsing -Uri $domain_uri/phalcon/cphalcon/releases | `
+         Select-String -Pattern "href=`"(.*phalcon_${arch}_.*_php${version}_${extension_version}.*[0-9].zip)`"" | `
+         ForEach-Object { $_.matches.groups[1].value } | `
+         Select-Object -Index 0
+  Invoke-WebRequest -UseBasicParsing -Uri $domain_uri/$uri -OutFile $ENV:TEMP\phalcon.zip
+  Expand-Archive -Path $ENV:TEMP\phalcon.zip -DestinationPath $ENV:TEMP\phalcon -Force
+  Copy-Item -Path $ENV:TEMP\phalcon\php_phalcon.dll -Destination $ext_dir
+  Enable-Phpextension phalcon
+}
+
 Function Add-Extension {
   Param (
     [Parameter(Position = 0, Mandatory = $true)]

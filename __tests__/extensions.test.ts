@@ -3,20 +3,22 @@ import * as extensions from '../src/extensions';
 describe('Extension tests', () => {
   it('checking addExtensionOnWindows', async () => {
     let win32: string = await extensions.addExtension(
-      'xdebug, pcov, redis',
+      'xdebug, pcov, redis, phalcon4',
       '7.4',
       'win32'
     );
     expect(win32).toContain('Add-Extension xdebug');
     expect(win32).toContain('Add-Extension pcov');
     expect(win32).toContain('Add-Extension redis beta');
+    expect(win32).toContain('Add-Phalcon phalcon4');
 
     win32 = await extensions.addExtension(
-      'does_not_exist',
+      'phalcon3, does_not_exist',
       '7.2',
       'win32',
       true
     );
+    expect(win32).toContain('Add-Phalcon phalcon3');
     expect(win32).toContain('Add-Extension does_not_exist');
 
     win32 = await extensions.addExtension('xdebug', '7.2', 'fedora');
